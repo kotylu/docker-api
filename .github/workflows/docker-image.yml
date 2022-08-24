@@ -16,6 +16,9 @@ jobs:
   java-compilation:
 
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
 
     steps:
     - uses: actions/checkout@v3
@@ -30,19 +33,8 @@ jobs:
     - name: build jar package
     - run: mvn -B package --file pom.xml
     
-    
-  docker-build:
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-    
-    steps:
-    - uses: actions/checkout@v3
-    
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag $IMAGE_NAME:0.1
-    
     
     - name: Log in to registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
@@ -50,7 +42,6 @@ jobs:
 # this one was made by me :D
 #    - name: Publish Docker image
 #    - run: docker push ghcr.io/kotylu/java-api:latest
-    
     
     - name: Push image
     - run: |
