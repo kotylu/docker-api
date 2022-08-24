@@ -13,7 +13,7 @@ env:
 
 jobs:
 
-  java-compilation:
+  ALL_IN_ONE_JOB:
 
     runs-on: ubuntu-latest
     permissions:
@@ -34,7 +34,7 @@ jobs:
       run: mvn -B package --file pom.xml
     
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag $IMAGE_NAME:0.1
+      run: docker build . --file Dockerfile --tag $IMAGE_NAME
     
     - name: Log in to registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
