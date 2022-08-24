@@ -6,9 +6,14 @@ on:
   pull_request:
     branches: [ "master" ]
 
+
+env:
+  IMAGE_NAME: java-api
+
+
 jobs:
 
-  build:
+  java-compilation:
 
     runs-on: ubuntu-latest
 
@@ -25,8 +30,42 @@ jobs:
     - name: build jar package
     - run: mvn -B package --file pom.xml
     
+    
+  docker-build:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    
+    steps:
+    - uses: actions/checkout@v3
+    
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag java-api:$(date +%s)
-      
-    - name: Publish Docker image
-    - run: docker push ghcr.io/kotylu/java-api:latest
+      run: docker build . --file Dockerfile --tag $IMAGE_NAME:0.1
+    
+    
+    - name: Log in to registry
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+    
+# this one was made by me :D
+#    - name: Publish Docker image
+#    - run: docker push ghcr.io/kotylu/java-api:latest
+    
+    
+    - name: Push image
+    - run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # Strip "v" prefix from tag name
+          # I don't use 'v' prefix
+          # [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
