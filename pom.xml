@@ -43,4 +43,12 @@
 		</plugins>
 	</build>
 
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/kotylu/docker-api</url>
+		</repository>
+	</distributionManagement>
+
 </project>
